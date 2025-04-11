@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Parameter Display & Settings</title>
+  <style>
+    body {
+      background: linear-gradient(135deg, #1e3c72, #2a5298);
+      color: white;
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+    }
+    #splash {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: linear-gradient(135deg, #1e3c72, #2a5298);
+    }
+    #splash img {
+      max-width: 200px;
+    }
+    #main {
+      display: none;
+      padding: 20px;
+    }
+    .parameter-row {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      font-size: 1.5em;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .param {
+      cursor: pointer;
+      padding: 15px;
+      border-radius: 12px;
+      background-color: rgba(255, 255, 255, 0.1);
+      transition: background 0.3s;
+      margin: 10px;
+    }
+    .param:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+    .alert {
+      animation: blink 1s infinite;
+      color: red;
+    }
+    @keyframes blink {
+      0%, 100% {opacity: 1;}
+      50% {opacity: 0;}
+    }
+    #settings-icon {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      font-size: 1.8em;
+      cursor: pointer;
+      background-color: #ffffff22;
+      padding: 10px;
+      border-radius: 50%;
+    }
+    .settings-group {
+      margin-bottom: 25px;
+      padding: 20px;
+      border-radius: 12px;
+    }
+    .setting-item {
+      margin-bottom: 12px;
+    }
+    .setting-item label {
+      display: inline-block;
+      width: 180px;
+    }
+    .nav-buttons, .save-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 25px;
+    }
+    .save-buttons {
+      justify-content: center;
+      gap: 20px;
+    }
+    .nav-buttons button, .save-buttons button {
+      background-color: #ffffff33;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    .nav-buttons button:hover, .save-buttons button:hover {
+      background-color: #ffffff55;
+    }
+    .lock {
+      color: #ddd;
+      cursor: pointer;
+      margin-left: 5px;
+    }
+    .lock:hover {
+      color: red;
+    }
+    .temp-group { background-color: rgba(255, 99, 71, 0.2); }
+    .humid-group { background-color: rgba(0, 191, 255, 0.2); }
+    .pressure-group { background-color: rgba(144, 238, 144, 0.2); }
+    .air-group { background-color: rgba(255, 215, 0, 0.2); }
+  </style>
+</head>
+<body>
+  <div id="splash">
+    <img src="company-logo.png" alt="Company Logo">
+  </div>
+
+  <div id="main">
+    <div class="parameter-row">
+      <div class="param" id="temp" onclick="toggleParam(this)" data-original="Temperature:">Temperature: <span id="val-temp">25°C</span></div>
+      <div class="param" id="humid" onclick="toggleParam(this)" data-original="Humidity:">Humidity: <span id="val-humid">45%</span></div>
+      <div class="param" id="dp" onclick="toggleParam(this)" data-original="Pressure:">Pressure: <span id="val-dp">101.3kPa</span></div>
+      <div class="param" id="aq" onclick="toggleParam(this)" data-original="Air Quality:">Air Quality: <span id="val-aq">Good</span></div>
+    </div>
+
+    <div class="save-buttons">
+      <button onclick="acknowledgeWarning()">Acknowledge Warning 🔔</button>
+    </div>
+
+    <div id="settings-icon" onclick="toggleSettings()">⚙</div>
+
+    <div id="settings-page" style="display:none">
+      <h2 style="text-align:center">Parameter Settings</h2>
+
+      <div class="settings-group temp-group" data-index="0">
+        <h3>Temperature</h3>
+        <div class="setting-item"><label>High Threshold:</label><input type="number"></div>
+        <div class="setting-item"><label>Low Threshold:</label><input type="number"></div>
+        <div class="setting-item"><label>Change Color:</label><input type="color"></div>
+        <div class="setting-item"><label>Text Style:</label><select><option>Normal</option><option>Bold</option><option>Italic</option></select></div>
+        <div class="setting-item"><label>Parameter On/Off:</label><input type="checkbox" checked></div>
+        <div class="setting-item"><label>Notification On/Off:</label><input type="checkbox" checked></div>
+        <div class="setting-item"><label>Offset Value:</label><input type="number"><span class="lock" onclick="checkPassword('Temperature')">🔒</span></div>
+      </div>
+
+      <div class="settings-group humid-group" data-index="1" style="display:none">
+        <h3>Humidity</h3>
+        <div class="setting-item"><label>High Threshold:</label><input type="number"></div>
+        <div class="setting-item"><label>Low Threshold:</label><input type="number"></div>
+        <div class="setting-item"><label>Color Scheme:</label><input type="color"></div>
+        <div class="setting-item"><label>Display Mode:</label><select><option>Normal</option><option>Compact</option></select></div>
+        <div class="setting-item"><label>Toggle Visibility:</label><input type="checkbox" checked></div>
+        <div class="setting-item"><label>Humidity Alerts:</label><input type="checkbox"></div>
+        <div class="setting-item"><label>Offset:</label><input type="number"><span class="lock" onclick="checkPassword('Humidity')">🔒</span></div>
+      </div>
+
+      <div class="settings-group pressure-group" data-index="2" style="display:none">
+        <h3>Pressure</h3>
+        <div class="setting-item"><label>Threshold:</label><input type="number"></div>
+        <div class="setting-item"><label>Warning Level:</label><input type="number"></div>
+        <div class="setting-item"><label>Parameter On/Off:</label><input type="checkbox" checked></div>
+        <div class="setting-item"><label>Notifications:</label><input type="checkbox"></div>
+        <div class="setting-item"><label>Pressure Offset:</label><input type="number"><span class="lock" onclick="checkPassword('Pressure')">🔒</span></div>
+      </div>
+
+      <div class="settings-group air-group" data-index="3" style="display:none">
+        <h3>Air Quality</h3>
+        <div class="setting-item"><label>Quality Index:</label><input type="number"></div>
+        <div class="setting-item"><label>Auto Adjust:</label><input type="checkbox"></div>
+        <div class="setting-item"><label>Alert Notification:</label><input type="checkbox" checked></div>
+        <div class="setting-item"><label>Color Theme:</label><input type="color"></div>
+        <div class="setting-item"><label>Offset AQ:</label><input type="number"><span class="lock" onclick="checkPassword('Air Quality')">🔒</span></div>
+      </div>
+
+      <div class="nav-buttons">
+        <button onclick="navigateSettings(-1)">⬅</button>
+        <button onclick="navigateSettings(1)">➡</button>
+      </div>
+
+      <div class="save-buttons">
+        <button onclick="saveSettings()">💾 Save Changes</button>
+        <button onclick="discardSettings()">❌ Discard Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let warningTimer;
+    let currentIndex = 0;
+
+    window.onload = function () {
+      setTimeout(() => {
+        document.getElementById("splash").style.display = "none";
+        document.getElementById("main").style.display = "block";
+      }, 3000);
+
+      warningTimer = setInterval(() => {
+        let temp = parseInt(document.getElementById("val-temp").innerText);
+        if (temp > 50) {
+          document.getElementById("temp").classList.add("alert");
+        }
+      }, 3000);
+    };
+
+    function acknowledgeWarning() {
+      document.querySelectorAll('.param').forEach(p => p.classList.remove("alert"));
+      clearTimeout(warningTimer);
+      warningTimer = setTimeout(() => alert("⚠ Reminder: Parameters still exceeding limits!"), 30000);
+    }
+
+    function toggleParam(el) {
+      const current = el.textContent.includes("Off");
+      el.innerHTML = current ? el.dataset.original : ${el.dataset.original} (Off);
+    }
+
+    function toggleSettings() {
+      const sp = document.getElementById("settings-page");
+      sp.style.display = sp.style.display === "none" ? "block" : "none";
+    }
+
+    function saveSettings() {
+      alert("✅ Settings Saved Successfully");
+    }
+
+    function discardSettings() {
+      alert("❌ Changes Discarded");
+    }
+
+    function checkPassword(param) {
+      const pass = prompt("Enter security password to change offset for " + param);
+      if (pass === "admin123") {
+        alert("Access granted to offset settings.");
+      } else {
+        alert("Incorrect password.");
+      }
+    }
+
+    function navigateSettings(direction) {
+      const groups = document.querySelectorAll(".settings-group");
+      groups[currentIndex].style.display = "none";
+      currentIndex = (currentIndex + direction + groups.length) % groups.length;
+      groups[currentIndex].style.display = "block";
+    }
+  </script>
+</body>
+</html>
